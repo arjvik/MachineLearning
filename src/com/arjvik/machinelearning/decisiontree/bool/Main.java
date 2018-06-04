@@ -98,10 +98,18 @@ public class Main {
 
 	private static void buildTree(int l, int k, Scenario scenario, Dataset training, Dataset validation, Dataset test, boolean toPrint) {
 		BooleanDecisionTree t = new BooleanDecisionTree(scenario);
-		
+
 		System.out.println("Information Gain Heuristic:");
 		t.setHeuristicFunction(BooleanDecisionTree.INFORMATION_GAIN_HEURISTIC);
 		Metrics m = t.train(training, test);
+		System.out.printf("Pre-pruning accuracy: %.2f%%%n",m.getClassificationPercentage()*100);
+		if(toPrint)
+			t.print();
+		
+
+		System.out.println("Variance Impurity Gain Heuristic:");
+		t.setHeuristicFunction(BooleanDecisionTree.VARIANCE_IMPURITY_GAIN_HEURISTIC);
+		m = t.train(training, test);
 		System.out.printf("Pre-pruning accuracy: %.2f%%%n",m.getClassificationPercentage()*100);
 		if(toPrint)
 			t.print();
