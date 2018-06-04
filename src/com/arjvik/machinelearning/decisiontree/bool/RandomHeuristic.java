@@ -8,7 +8,7 @@ public class RandomHeuristic implements Heuristic {
 	
 	@Override
 	public double calculcate(Dataset headDataset, Dataset posDataset, Dataset negDataset) {
-		return r.nextDouble();
+		return r.nextDouble() - 0.95d;
 	}
 
 }

@@ -2,9 +2,12 @@ package com.arjvik.machinelearning.decisiontree.bool;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 import java.util.stream.Collectors;
 
 public class BooleanDecisionTree implements ScenarioHolder {
+	
+	private static final double PRUNING_ACCURACY_GAIN_OFFSET = 0.01;
 	
 	private final Scenario scenario;
 	private Node head;
@@ -91,41 +94,96 @@ public class BooleanDecisionTree implements ScenarioHolder {
 		return featuresAvailable;
 	}
 
-	public Metrics validate(Dataset validation, Dataset testing) {
+	public Metrics prune(Dataset validation, Dataset testing, int l, int k) {
 		validateScenarios(validation, testing);
-		validate(validation);
+		prune(validation, l, k);
 		return test(testing);
 	}
 	
-	private void validate(Dataset validation) {
-		// TODO Auto-generated method stub
-		//throw new RuntimeException("VALIDATION NOT IMPLEMENTED");
-		System.err.println("VALIDATION NOT IMPLEMENTED");
+	private void prune(Dataset validation, int l, int k) {
+		Node bestHead = head;
+		Metrics bestAccuracy = test(validation);
+		System.out.printf("Pre-pruning validation accuracy: %.2f%%%n",bestAccuracy.getClassificationPercentage()*100);
+		Random rand = new Random();
+		for (int i = 0; i < l; i++) {
+			Node newHead = clone(head);
+			int m = rand.nextInt(k) + 1;
+			for (int j = 0; j < m; j++) {
+				List<Node> nodes = new ArrayList<>();
+				List<Boolean> dir = new ArrayList<>();
+				Node toRecurseOn = newHead;
+				while(toRecurseOn instanceof BranchingNode) {
+					nodes.add(toRecurseOn);
+					switch(rand.nextInt(2)) {
+					case 0:
+						dir.add(true);
+						toRecurseOn =  ((BranchingNode) toRecurseOn).getPosChild();
+						break;
+					case 1:
+						dir.add(false);
+						toRecurseOn =  ((BranchingNode) toRecurseOn).getNegChild();
+						break;
+					default:
+						throw new RuntimeException();
+					}
+				}
+				if(nodes.size() == 1 || nodes.size() == 0)
+					continue;
+				int p = rand.nextInt(nodes.size() - 1);
+				BranchingNode toRemove = (BranchingNode) nodes.get(p+1);
+				Node toReplace = new LeafNode(scenario, toRemove.getPosOutputCount(), toRemove.getNegOutputCount());
+				if(dir.get(p))
+					((BranchingNode) nodes.get(p)).setPosChild(toReplace);
+				else
+					((BranchingNode) nodes.get(p)).setNegChild(toReplace);
+			}
+			Metrics accuracy = test(validation, newHead);
+			if(accuracy.getClassificationPercentage() > bestAccuracy.getClassificationPercentage() + PRUNING_ACCURACY_GAIN_OFFSET) {
+				bestHead = newHead;
+				bestAccuracy = accuracy;
+				System.out.printf("Pruning (round %d of %d) validation new highest accuracy: %.2f%%%n", i+1, l, accuracy.getClassificationPercentage()*100);
+			}
+		}
+		head = bestHead;
+	}
+
+	private Node clone(Node head) {
+		if(head instanceof LeafNode)
+			return new LeafNode(scenario, ((LeafNode) head).getPosCount(), ((LeafNode) head).getNegCount());
+		BranchingNode newHead = new BranchingNode(scenario, ((BranchingNode) head).getFeaturesAvailable(), ((BranchingNode) head).getCurrentFeature(), ((BranchingNode) head).getPosOutputCount(), ((BranchingNode) head).getNegOutputCount());
+		newHead.setPosChild(clone(((BranchingNode) head).getPosChild()));
+		newHead.setNegChild(clone(((BranchingNode) head).getNegChild()));
+		return newHead;
 	}
 
 	private Metrics test(Dataset testing) {
+		return test(testing, head);
+	}
+	
+	private Metrics test(Dataset testing, Node head) {
 		int total = 0;
 		int correct = 0;
 		for (DataOutput dataTesting : testing.getTrainingData()) {
 			total++;
-			DataOutput dataOutput = classify(dataTesting);
+			DataOutput dataOutput = classify(dataTesting, head);
 			if(dataOutput.getOutput() == dataTesting.getOutput())
 				correct++;
 		}
 		double percentage = ((double) correct) / total;
 		return new Metrics(percentage);
 	}
-
+	
 	public DataOutput classify(Data data) {
+		return classify(data, head);
+	}
+
+	private DataOutput classify(Data data, Node head) {
 		boolean output = head.classify(data);
 		return new DataOutput(scenario, output, data.getData());
 	}
 	
 	public void print() {
-		System.out.println(head.print(0, true).replaceAll("\n\n", "\n")
-				  .replaceAll("\n\n", "\n")
-				  .replaceAll("\n\n", "\n")
-				  .replaceAll("\n\n", "\n"));
+		System.out.println(head.print(0, true).replaceAll("\n{2,}", "\n"));
 	}
 	
 }

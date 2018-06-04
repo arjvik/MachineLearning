@@ -5,19 +5,23 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Scanner;
 
 public class Main {
 	
+	private static final Map<String,Heuristic> heuristics = getHeuristics();
+	private static double netPruningGain = 0;
+	
 	public static void main(String... args) throws IOException {
 		if(args.length == 0) {
-			System.out.println("Dataset 1:");
-			main("10", "10", "testdata/decisiontree/training_set_1.csv", "testdata/decisiontree/validation_set_1.csv", "testdata/decisiontree/test_set_1.csv", "no");
-			System.out.println("\nDataset 2:");
-			main("10", "10", "testdata/decisiontree/training_set_2.csv", "testdata/decisiontree/validation_set_2.csv", "testdata/decisiontree/test_set_2.csv", "no");
-//			main("10", "10", "testdata/decisiontree/test_set_1.csv", "testdata/decisiontree/validation_set_1.csv", "testdata/decisiontree/training_set_1.csv", "no");
-//			main("10", "10", "testdata/decisiontree/training_set_custom.csv", "testdata/decisiontree/training_set_custom.csv", "testdata/decisiontree/training_set_custom_full.csv", "no");
+			System.out.println("Dataset 1:\n----------");
+			main("10000", "100", "testdata/decisiontree/training_set_1.csv", "testdata/decisiontree/validation_set_1.csv", "testdata/decisiontree/test_set_1.csv", "no");
+			System.out.println("\nDataset 2:\n----------");
+			main("10000", "100", "testdata/decisiontree/training_set_2.csv", "testdata/decisiontree/validation_set_2.csv", "testdata/decisiontree/test_set_2.csv", "no");
+			System.out.printf("%nNet Pruning Gain (All Datasets): %.2f%%%n", netPruningGain*100);
 			return;
 		}
 		if(args.length != 6) {
@@ -35,6 +39,14 @@ public class Main {
 						  toPrintString.equalsIgnoreCase("true") ||
 						  toPrintString.equalsIgnoreCase("1");
 		generateDatasetAndBuildTree(L, K, training, validation, test, toPrint);
+	}
+
+	private static Map<String, Heuristic> getHeuristics() {
+		Map<String, Heuristic> h = new LinkedHashMap<>();
+		h.put("Information Gain Heuristic", BooleanDecisionTree.INFORMATION_GAIN_HEURISTIC);
+		h.put("Variance Gain Heuristic", BooleanDecisionTree.VARIANCE_IMPURITY_GAIN_HEURISTIC);
+		h.put("Random Heuristic", BooleanDecisionTree.RANDOM_HEURISTIC);
+		return h;
 	}
 
 	private static void generateDatasetAndBuildTree(int l, int k, String training, String validation, String test, boolean toPrint) throws IOException {
@@ -93,34 +105,29 @@ public class Main {
 			}
 			testDataset = new Dataset(s, dataOutputs);
 		}
-		buildTree(l, k, s, trainingDataset, validationDataset, testDataset, toPrint);
+		buildAndRunTree(l, k, s, trainingDataset, validationDataset, testDataset, toPrint);
 	}
 
-	private static void buildTree(int l, int k, Scenario scenario, Dataset training, Dataset validation, Dataset test, boolean toPrint) {
+	private static void buildAndRunTree(int l, int k, Scenario scenario, Dataset training, Dataset validation, Dataset test, boolean toPrint) {
 		BooleanDecisionTree t = new BooleanDecisionTree(scenario);
+		for (String heuristic : heuristics.keySet()) {
+			System.out.printf("%s:%n",heuristic);
+			t.setHeuristicFunction(heuristics.get(heuristic));
+			Metrics m = t.train(training, test);
+			System.out.printf("Pre-pruning accuracy: %.2f%%%n",m.getClassificationPercentage()*100);
+			printIf(t, toPrint);
+			Metrics m2 = t.prune(validation, test, l, k);
+			System.out.printf("Post-pruning accuracy: %.2f%%%n",m2.getClassificationPercentage()*100);
+			System.out.printf("Pruning gain: %.2f%%%n", (m.getClassificationPercentage()-m2.getClassificationPercentage())*100 );
+			netPruningGain  += (m.getClassificationPercentage()-m2.getClassificationPercentage());
+			printIf(t, toPrint);
+			System.out.println();
+		}
+	}
 
-		System.out.println("Information Gain Heuristic:");
-		t.setHeuristicFunction(BooleanDecisionTree.INFORMATION_GAIN_HEURISTIC);
-		Metrics m = t.train(training, test);
-		System.out.printf("Pre-pruning accuracy: %.2f%%%n",m.getClassificationPercentage()*100);
-		if(toPrint)
+	private static void printIf(BooleanDecisionTree t, boolean print) {
+		if(print)
 			t.print();
-		
-
-		System.out.println("Variance Impurity Gain Heuristic:");
-		t.setHeuristicFunction(BooleanDecisionTree.VARIANCE_IMPURITY_GAIN_HEURISTIC);
-		m = t.train(training, test);
-		System.out.printf("Pre-pruning accuracy: %.2f%%%n",m.getClassificationPercentage()*100);
-		if(toPrint)
-			t.print();
-		
-		System.out.println("Random Heuristic:");
-		t.setHeuristicFunction(BooleanDecisionTree.RANDOM_HEURISTIC);
-		m = t.train(training, test);
-		System.out.printf("Pre-pruning accuracy: %.2f%%%n",m.getClassificationPercentage()*100);
-		if(toPrint)
-			t.print();
-		
 	}
 	
 }
