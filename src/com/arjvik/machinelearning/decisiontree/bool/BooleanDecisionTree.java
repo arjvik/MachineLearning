@@ -12,6 +12,7 @@ public class BooleanDecisionTree implements ScenarioHolder {
 
 	public static final Heuristic INFORMATION_GAIN_HEURISTIC = new InformationGainHeuristic();
 	public static final Heuristic VARIANCE_IMPURITY_GAIN_HEURISTIC = new VarianceImpurityGainHeuristic();
+	public static final Heuristic RANDOM_HEURISTIC = new RandomHeuristic();
 	
 	public BooleanDecisionTree(Scenario scenario) {
 		super();

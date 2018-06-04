@@ -114,6 +114,13 @@ public class Main {
 		if(toPrint)
 			t.print();
 		
+		System.out.println("Random Heuristic:");
+		t.setHeuristicFunction(BooleanDecisionTree.RANDOM_HEURISTIC);
+		m = t.train(training, test);
+		System.out.printf("Pre-pruning accuracy: %.2f%%%n",m.getClassificationPercentage()*100);
+		if(toPrint)
+			t.print();
+		
 	}
 	
 }

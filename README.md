@@ -6,7 +6,8 @@ This is my implementations of Machine Learning algorithms in Java.
 Current state:
 - [x] Implement Building Tree
 - [x] Implement Information Gain heuristic function
-- [x] Implement Variance Impurity Gain heuristic functions
+- [x] Implement Variance Impurity Gain heuristic function
+- [x] Implement Random heuristic function
 - [x] Implement Testing Tree / Calculating Accuracy
 - [x] Implement Printing Tree
 - [ ] Implement Pruning Tree
@@ -18,12 +19,16 @@ Information Gain Heuristic:
 Pre-pruning accuracy: 75.85%
 Variance Impurity Gain Heuristic:
 Pre-pruning accuracy: 76.65%
+Random Heuristic:
+Pre-pruning accuracy: 50.00%
 
 Dataset 2:
 Information Gain Heuristic:
 Pre-pruning accuracy: 72.33%
 Variance Impurity Gain Heuristic:
 Pre-pruning accuracy: 72.50%
+Random Heuristic:
+Pre-pruning accuracy: 50.00%
 ```
 
 ### Compilation (Required as part of homework)
