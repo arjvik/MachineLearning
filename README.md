@@ -73,4 +73,4 @@ Net Pruning Gain (All Datasets): 1.22%
    - In order to offset this, I required the validation gains during pruning to be at least 1%. This made no difference.
 
 ### Compilation (Required as part of homework)
-Easy! Tested on `ecj` but should work fine on `javac`. The main class is called, you guessed it, `Main.java`.
+Easy! Tested on `ecj` but should work fine on `javac`. The main class is called `BooleanDecisionTreeRunner.java`.
