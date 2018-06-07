@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 
-public class Main {
+public class BooleanDecisionTreeRunner {
 	
 	private static final Map<String,Heuristic> heuristics = getHeuristics();
 	private static double netPruningGain = 0;

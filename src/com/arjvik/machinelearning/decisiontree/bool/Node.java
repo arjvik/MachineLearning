@@ -6,4 +6,8 @@ public interface Node extends ScenarioHolder {
 	
 	public String print(int indent, boolean newline);
 	
+	public int getPosOutputCount();
+	
+	public int getNegOutputCount();
+	
 }

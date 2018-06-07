@@ -149,7 +149,7 @@ public class BooleanDecisionTree implements ScenarioHolder {
 
 	private Node clone(Node head) {
 		if(head instanceof LeafNode)
-			return new LeafNode(scenario, ((LeafNode) head).getPosCount(), ((LeafNode) head).getNegCount());
+			return new LeafNode(scenario, head.getPosOutputCount(), head.getNegOutputCount());
 		BranchingNode newHead = new BranchingNode(scenario, ((BranchingNode) head).getFeaturesAvailable(), ((BranchingNode) head).getCurrentFeature(), ((BranchingNode) head).getPosOutputCount(), ((BranchingNode) head).getNegOutputCount());
 		newHead.setPosChild(clone(((BranchingNode) head).getPosChild()));
 		newHead.setNegChild(clone(((BranchingNode) head).getNegChild()));
