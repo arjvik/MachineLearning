@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
 
+@lombok.Data
 public class BooleanDecisionTree implements ScenarioHolder {
 	
 	private static final double PRUNING_ACCURACY_GAIN_OFFSET = 0.01;
@@ -17,23 +18,6 @@ public class BooleanDecisionTree implements ScenarioHolder {
 	public static final Heuristic VARIANCE_IMPURITY_GAIN_HEURISTIC = new VarianceImpurityGainHeuristic();
 	public static final Heuristic RANDOM_HEURISTIC = new RandomHeuristic();
 	
-	public BooleanDecisionTree(Scenario scenario) {
-		super();
-		this.scenario = scenario;
-	}
-
-	public Scenario getScenario() {
-		return scenario;
-	}
-	
-	public Heuristic getHeuristicFunction() {
-		return heuristicFunction;
-	}
-
-	public void setHeuristicFunction(Heuristic heuristicFunction) {
-		this.heuristicFunction = heuristicFunction;
-	}
-
 	public Metrics train(Dataset training, Dataset testing) {
 		if(heuristicFunction == null)
 			throw new NullPointerException("Heuristic Function cannot be null. Please initialize it before attempting to train the tree.");

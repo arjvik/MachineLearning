@@ -25,7 +25,8 @@ public class BooleanDecisionTreeRunner {
 			return;
 		}
 		if(args.length != 6) {
-			System.err.println("Usage: Main <L:integer> <K:integer> <training-set:path-to-csv-file> "
+			System.err.println("Usage: java com.arjvik.machinelearning.decisiontree.bool.BooleanDecisionTreeRunner <L:integer> "
+					+ "<K:integer> <training-set:path-to-csv-file> "
 					+ "<validation-set:path-to-csv-file> <test-set:path-to-csv-file> <to-print:yes|no>");
 			return;
 		}
@@ -118,8 +119,8 @@ public class BooleanDecisionTreeRunner {
 			printIf(t, toPrint);
 			Metrics m2 = t.prune(validation, test, l, k);
 			System.out.printf("Post-pruning accuracy: %.2f%%%n",m2.getClassificationPercentage()*100);
-			System.out.printf("Pruning gain: %.2f%%%n", (m.getClassificationPercentage()-m2.getClassificationPercentage())*100 );
-			netPruningGain  += (m.getClassificationPercentage()-m2.getClassificationPercentage());
+			System.out.printf("Pruning gain: %.2f%%%n", (m2.getClassificationPercentage()-m.getClassificationPercentage())*100 );
+			netPruningGain  += (m2.getClassificationPercentage()-m.getClassificationPercentage());
 			printIf(t, toPrint);
 			System.out.println();
 		}
